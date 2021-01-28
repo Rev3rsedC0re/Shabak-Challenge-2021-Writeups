@@ -1,0 +1,108 @@
+###################################################################################
+The Challenge:
+You are provided with the 3 files in the "Original" folder;
+These files creates a program which is used by terrorists for secure communication.
+You must decrypt the messages to find the flag.
+The flag looks like: flag{..............}
+####################################################################################
+
+
+
+####################################################################################
+Steps for solution:
+1. run the exe file. It was created with visual studio (indicated by the logo)
+2. disassemble the exe in ILSpy
+3. This is the code:
+ public void DecryptFile(byte[] k, string input, string output)
+    {
+      byte[] buffer = File.ReadAllBytes(input);
+      string empty = string.Empty;
+      using (MemoryStream memoryStream = new MemoryStream())
+      {
+        using (CryptoStream cryptoStream = new CryptoStream((Stream) memoryStream, PinForm.GetCryptoAlgorithm().CreateDecryptor(k, k), CryptoStreamMode.Write))
+          cryptoStream.Write(buffer, 0, buffer.Length);
+        File.WriteAllBytes(output, memoryStream.ToArray());
+      }
+    }
+
+    private void buttonCheckPin_Click(object sender, EventArgs e)
+    {
+      string text = this.richTextBoxPinCode.Text;
+      if (text.Length != 4)
+      {
+        this.richTextBoxPinCode.Text = "";
+      }
+      else
+      {
+        try
+        {
+          string input = text;
+          string str = text;
+          for (int index = 0; index < 10; ++index)
+          {
+            input = this.DoMD5(input);
+            str = this.DoMD5(str);
+          }
+          for (int index = 0; index < 10; ++index)
+            input = this.DoMD5(input);
+          if ("2D3114BCC2E5C58BBAC77F04237723D9" == input)
+          {
+            byte[] byteArray = PinForm.StringToByteArray(str);
+            this.DecryptFile(byteArray, "ForceCoinTransactionSigner.dll.enc", "ForceCoinTransactionSigner.dll");
+            this.DecryptFile(byteArray, "db.txt.enc", "db.txt");
+            AppForm appForm = new AppForm();
+            this.Hide();
+            int num = (int) appForm.ShowDialog();
+            this.Close();
+          }
+        }
+        catch (Exception ex)
+        {
+        }
+        this.richTextBoxPinCode.Text = "";
+      }
+    }
+    
+    
+    4. As you can see, md5 is done 20 times on the input and the result of the 10th md5 is used as a key to decipher "ForceCoinTransactionSigner.dll.enc" and "db.txt.enc".
+    So, we must find a a string with length of 4 which its 20th md5 is "2D3114BCC2E5C58BBAC77F04237723D9".
+    5.In the solution folder there is a python script called md5-cracker.py. I used it to find the correct input. The input is: 5cRt
+    6.The app moves to the next screen, in which we can create and encrypt conversations. After playing with it a little bit it seems that the encryption depends only on the current character and the characters before that(the length doesn't matter)
+    7.It can be observed that the generated db.txt (from db.txt.enc) contains encrypted conversation. Since the app also writes to that file we save a copy of it at db_save.txt.
+    8.We know that the form of the flag is: flag{...........}, so we clear db.txt and enter as input "flag{" and save to see if there is some similarity to one of the encrypted messages.
+    9.We find a similar message:
+    Alice -> Bob [8fa14cdd754f91cc6554c9e71929cce7, 3d296788f2a7e19ffbd912521d94a5f4, 61894b21be75260c4964065b1eecec4d, 
+    327a6c4304ad5938eaf0efb6cc3e53dc, 4ff89342bb46cea91a288c3bed86e1b2, f368b01cf4b9d94958b8d860e36298a3, 
+    20f75852e11a4ef192ccc33efc1dd41a, e7f7897cd91d0ce36851020e718e3e19, 849d8f0974d2a081d83330f7183604df, 
+    884cb3cd32cb2a6d5c645432a344fbbb, bce419f01d3e788dc8b21e8a2c7abfdc, 7ed269b23f5aa08ff9027a1b798a79ac, 
+    9ff7c4366ad5bbe5b51bf6417cd1424a, 88ff232e07a2755f6a92af51b9bf9737, b88aff7d11354c59bec8cc7e45040169, 
+    4bf148341e925de63f7069e321fd4cba, 1db8fd170c9d4580a125e1bfb98ea99e, c3c54e9d72f38482699cccc85ccabf37, 7d4e4ef06142ba28771d8d8d203a4570]
+    Then save the message to save.txt
+    10.We use decrypt_msg.py to decrypt the whole message - it does that by hand, which means it simulates click and keyboard to solve it.
+    It also uses constant point so you might need to change it according to your screen (Python programming knowledge is required).
+    11.This is it, we have the flag! Hint: the flag looks like: flag{L3...-.......}
+    
+    #########################################################################################################################################
+    Option 2 for solving the encryption: You might want to try to reverse engineer the dll of the encryption algorithm. I didn't do it because it seemed
+    faster to write an algorithm that will solve it without reversing it, but I encourage you to give it a shot!
+    #########################################################################################################################################
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
