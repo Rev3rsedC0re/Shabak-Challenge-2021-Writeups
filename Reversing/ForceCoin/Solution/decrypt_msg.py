@@ -10,7 +10,6 @@ mouse = Mouse()
 chars='abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&&*()}:|\/.~;-<>,'
 arr=[(980,300),(980,335),(980,370),(980,405),(980,440),(980,475)]
 
-#flag = 'flag{L3m0n-SqueeZy}'
 flag='flag{'
 def on_click(x, y, button, pressed):
     if not pressed:
