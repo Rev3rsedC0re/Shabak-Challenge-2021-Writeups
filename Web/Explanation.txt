@@ -1,0 +1,4 @@
+This is an unfinished ctf.
+----------------------------
+Steps:
+1. Disassembled exe file and patched the login scheme - the api is deprecated
